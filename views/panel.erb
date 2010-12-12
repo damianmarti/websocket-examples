@@ -1,0 +1,142 @@
+<% content_for :head do %>
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> 
+<script type="text/javascript" charset="utf-8" src="/js/fancy-websocket.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/underscore.js"></script>
+
+<script type="text/javascript">
+ 
+		var chart;
+		jQuery(document).ready(function() {
+			chart = new Highcharts.Chart({
+				chart: {
+					renderTo: 'container',
+					defaultSeriesType: 'spline',
+          marginRight: 10          
+				},
+			  credits: {
+          enabled: false          
+			  },        
+				title: {
+					text: 'Nuevas Propiedades',
+					style: {
+						margin: '10px 100px 0 0' // center it
+					}
+				},
+				xAxis: {
+					type: 'datetime',
+					tickPixelInterval: 150
+				},
+				yAxis: {
+					title: {
+						text: 'Cantidad'
+					},
+					plotLines: [{
+						value: 0,
+						width: 1,
+						color: '#808080'
+					}]
+				},
+				tooltip: {
+					formatter: function() {
+			                return Highcharts.dateFormat('%H:%M:%S', this.x) +': '+ 
+							Highcharts.numberFormat(this.y, 0)+" "+this.series.name;
+					}
+				},
+				legend: {
+					enabled: false
+				},
+				exporting: {
+					enabled: false
+				},
+				series: [{
+					name: 'Propiedades',
+					data: []
+				}]
+			});
+			
+			
+		});
+    
+    $(function(){
+      var propertiesCount = 0;
+      var myLatlng = new google.maps.LatLng(-34.614844,-58.4095);
+      var myOptions = {
+        zoom: 12,
+        center: myLatlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+      }
+ 
+      var map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);    
+      
+      var socket = new FancyWebSocket('ws://<%= IP %>:8080');
+      
+      $('#status').text('connecting...');
+      
+      /* -----------------------------------------------------
+      Listen to socket messages
+      -------------------------------------------------------*/
+      
+      socket.bind('open', function () {
+        $('#status').removeClass('disconnected').addClass('connected').text('connected');
+      });
+      
+      socket.bind('close', function () {
+        $('#status').removeClass('connected').addClass('disconnected').text('disconnected');
+      });      
+
+      socket.bind('new_properties', function (property) {        
+        console.log(property);
+		    var li = $('<li>')
+          .text(property.title+": "+property.address_original)
+          .appendTo('#messages');
+
+        var infowindow = new google.maps.InfoWindow({
+          content: property.title
+        });
+ 
+        var propertyLatlng = new google.maps.LatLng(property.lat,property.lon);
+    
+        var marker = new google.maps.Marker({
+          position: propertyLatlng,
+          map: map,
+          title: property.title
+        });          
+          
+        //infowindow.open(map,marker);
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.open(map,marker);
+        });        
+        
+        var series = chart.series[0];              
+        propertiesCount++;
+        var x = (new Date()).getTime(), // current time
+									y = propertiesCount;  
+    
+        series.addPoint([x, y]);                
+    
+        $('#messages').attr('scrollTop', $('#messages').attr('scrollHeight'));
+        
+        li.highlightFade({start: '#0D4512', end: '#000000'});
+      });      
+            
+    })
+  </script>
+<% end %>
+
+<h2>Nuevas Propiedades</h2>
+
+<ul id="messages" class="rounded info_box">
+
+</ul>
+
+
+<% content_for :chart do %>
+	<div id="container" class="highcharts-container" style="height:350px; width: 480px; margin: 0 auto; clear:both">
+	</div>
+<% end %>
+
+<% content_for :map do %>
+<div id="map_canvas" style="width:480px;height:350px;"></div> 
+<% end %>
+

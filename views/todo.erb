@@ -1,0 +1,77 @@
+<% content_for :head do %>
+  <script type="text/javascript" charset="utf-8" src="/js/fancy-websocket.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/underscore.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    $(function(){
+      
+      socket = new FancyWebSocket('ws://<%= IP %>:8080');
+      
+	    var clientId = Math.floor(Math.random()*10000);
+	    var taskId = 1;
+
+      $('#status').text('connecting...');
+      
+      /* -----------------------------------------------------
+      Listen to socket messages
+      -------------------------------------------------------*/
+      
+      socket.bind('open', function () {
+        $('#status').removeClass('disconnected').addClass('connected').text('connected');
+      });
+      
+      socket.bind('close', function () {
+        $('#status').removeClass('connected').addClass('disconnected').text('disconnected');
+      });
+      
+      socket.bind('new_task', function (evt) {
+        var input = $('<input type="checkbox" onchange="socket.send(\'remove_task\', {id: this.parentNode.id});" />');
+	      var li = $('<li id="'+evt.id+'">')
+          .text(evt.name)
+          .appendTo('#tasks');
+        
+        input.prependTo(li);  
+
+        $('#tasks').attr('scrollTop', $('#tasks').attr('scrollHeight'));
+        
+        li.highlightFade({start: '#0D4512', end: '#000000'});
+      });
+
+      socket.bind('remove_task', function (evt) {
+	      $("#"+evt.id).fadeOut();        
+      });
+
+      /* ---------------------------------------------------
+      Send messages to socket
+      -----------------------------------------------------*/
+      
+      $('#post').submit(function () {
+        var field = $(this).find('[name=message]'),
+            name = field.val();
+        if( name == '' ) {
+          alert('Say what?');
+          field.focus();
+          return false;
+        }
+	      socket.send('new_task', {name: name, id:clientId+"_"+taskId});
+        taskId++;
+        field.val('');
+        field.focus();
+        return false;
+      });
+    })
+
+
+
+  </script>
+<% end %>
+
+<ul id="tasks" class="rounded todo">
+  
+</ul>
+
+<fieldset>
+  <form id="post">    
+    <input type="text" size="60" name="message" placeholder="Task Name" />
+    <input type="submit" value="Add Task" />
+  </form>
+</fieldset>

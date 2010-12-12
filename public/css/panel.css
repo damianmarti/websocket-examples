@@ -1,0 +1,81 @@
+body, html, table, form, ul, ol, li, dt, dd, dl, fieldset {
+  padding:0;
+  margin:0;
+}
+
+body {
+  font-family: 'Lucida Grande', helvetica, sans-serif;
+  font-size: 12px;
+  text-align: center;
+  background: white;
+
+}
+
+#page {
+  width: 1000px;
+  margin: 0 auto;
+}
+
+.rounded {
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+}
+.shadowed {
+  -webkit-box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  -moz-box-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+
+#status {
+  padding: 3px 1em;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-block;
+  border-width: 3px;
+  border-style: solid;
+  text-align: center;
+}
+#status.connected {
+  color: green;
+  border-color: green;
+}
+#status.disconnected {
+  color: red;
+  border-color: red;
+}
+#status.connected,
+#status.disconnected {
+  -webkit-box-shadow: 2px 2px 3px rgba(0,0,0,0.3);
+}
+
+#main, #sidebar {
+  float:left;
+  width: 480px;
+  min-height: 700px;
+  padding: 10px;
+}
+
+#main {
+  border-right:lightgray 2px solid;
+  width: 478px;
+}
+
+#messages {
+  margin-bottom: 20px;
+  min-height: 530px;
+  max-height: 530px;
+  overflow: auto;
+  font-size: 20px;
+  font-family: monospace;
+  
+  background: black;
+  color: #1BAE1A;
+  padding: 10px;
+  text-align: left;
+}
+#messages li {
+  margin-bottom: 5px;
+  margin-left: 20px;
+}
