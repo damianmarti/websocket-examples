@@ -64,18 +64,27 @@ h1 {
 
 /* Chat
 -------------------------------*/
-#messages, #tasks {
+#messages, #tasks, #users {
   margin-bottom: 20px;
   max-height: 200px;
   overflow: auto;
   font-size: 20px;
   font-family: monospace;
   
-  background: black;
-  color: #1BAE1A;
+  background: white;
+  color: black;
   padding: 10px;
 }
-#messages li, #tasks li {
+#messages {
+  width: 500px;
+  float: left;
+}
+#users {
+  width: 250px;
+  margin-left: 30px;
+  float: left;
+}
+#messages li, #tasks li, #users li {
   margin-bottom: 5px;
   margin-left: 20px;
 }
@@ -87,6 +96,10 @@ h1 {
 input[type=text] {
   font-size: 20px;
   padding: .25em;
+}
+
+#post {
+  display: none;
 }
 
 /* Drawing

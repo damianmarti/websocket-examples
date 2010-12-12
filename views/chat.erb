@@ -1,21 +1,26 @@
 <% content_for :head do %>
+<script type="text/javascript" charset="utf-8" src="/js/fancy-websocket.js"></script>
+  <script type="text/javascript" charset="utf-8" src="/js/underscore.js"></script>
   <script type="text/javascript" charset="utf-8">
+    
+    var user = "";
+  
     $(function(){
 
       document.getElementById('request_permission').addEventListener('click', function() {
             window.webkitNotifications.requestPermission();
       }, false);
             
-      function showNotification(text) {        
+      function showNotification(title,text) {        
         if (window.webkitNotifications.checkPermission() == 0) {
           // note the show()
-          window.webkitNotifications.createNotification('', 'New Message', text).show(); 
+          window.webkitNotifications.createNotification('', title, text).show(); 
         } else {
           alert('You have to click on "Set notification permissions for this page" first to be able to receive notifications.');
         }  
       }
       
-      var socket = new WebSocket('ws://<%= IP %>:8080');
+      socket = new FancyWebSocket('ws://<%= IP %>:8080');
       
       $('#status').text('connecting...');
       
@@ -23,25 +28,39 @@
       Listen to socket messages
       -------------------------------------------------------*/
       
-      socket.onopen = function() {
+      socket.bind('open', function () {
         $('#status').removeClass('disconnected').addClass('connected').text('connected');
-      }
+      });
       
-      socket.onclose = function() {
+      socket.bind('close', function () {
         $('#status').removeClass('connected').addClass('disconnected').text('disconnected');
-      }
-      
-      socket.onmessage = function( evt ) {
+      });      
+
+      socket.bind('new_message', function (evt) {        
         var li = $('<li>')
-          .text(evt.data)
+          .text(evt.user+": "+evt.message)
           .appendTo('#messages');
           
         $('#messages').attr('scrollTop', $('#messages').attr('scrollHeight'));
         
-        showNotification(evt.data);
+        if (evt.user != user)
+          showNotification('New message from '+evt.user,evt.message);
         
-        li.highlightFade({start: '#0D4512', end: '#000000'});
-      }
+        li.highlightFade({start: '#0D4512', end: '#FFFFFF'});
+      });
+
+      socket.bind('new_user', function (evt) {        
+        var li = $('<li>')
+          .text(evt.name)
+          .appendTo('#users');
+          
+        $('#users').attr('scrollTop', $('#messages').attr('scrollHeight'));
+        
+        if (evt.name != user)
+          showNotification('New User',evt.name);
+        
+        li.highlightFade({start: '#0D4512', end: '#FFFFFF'});
+      });      
       
       /* ---------------------------------------------------
       Send messages to socket
@@ -54,19 +73,52 @@
           alert('Say what?');
           field.focus();
           return false;
-        }
-        socket.send(message);
+        }        
+        socket.send('new_message', {user: user, message: message});        
         field.val('');
         field.focus();
         return false;
       });
+      
+      $('#login').submit(function () {
+        var field = $(this).find('[name=name]'),
+            name = field.val();
+        if( name == '' ) {
+          alert('Enter your name!');
+          field.focus();
+          return false;
+        }
+        socket.send('new_user', {name: name});        
+        user = name;
+        field.val('');
+        $('#login').hide();
+        $('#post').show();   
+        $('#post').find('[name=message]').focus();
+        return false;
+      });      
+      
     })
   </script>
 <% end %>
 
+
 <ul id="messages" class="rounded">
-  
+  <li>MESSAGES</li>  
 </ul>
+
+
+<ul id="users" class="rounded">
+  <li>USERS</li>  
+</ul>
+
+<br style="clear:both;" />
+
+<fieldset>
+  <form id="login">    
+    <input type="text" size="20" name="name" placeholder="Your name" />
+    <input type="submit" value="Login" />
+  </form>
+</fieldset>
 
 <fieldset>
   <form id="post">    
