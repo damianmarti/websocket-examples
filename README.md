@@ -1,4 +1,4 @@
-# Websocket examples for Rubyconf Uruguay 2010
+# Websocket examples
 
 ## Usage
 
@@ -6,8 +6,9 @@ Socket servers are in sockets/. There's a Sinatra site with pages that listen to
 
 Start one or more socket server examples.
 
-    ruby sockets/basic_chat.rb
+    ruby sockets/multicast.rb
     
+Based on http://github.com/ismasan/websockets_examples.git
 
 Start the site:
 
@@ -23,6 +24,6 @@ You'll need the Bundler gem installed to manage dependencies.
     
 Now you can clone and install dependencies
 
-    git clone http://github.com/ismasan/websockets_examples.git
-    cd websockets_examples
+    git clone http://github.com/damianmarti/websocket-examples
+    cd websocket_examples
     bundle install
