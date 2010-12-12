@@ -1,6 +1,19 @@
 <% content_for :head do %>
   <script type="text/javascript" charset="utf-8">
     $(function(){
+
+      document.getElementById('request_permission').addEventListener('click', function() {
+            window.webkitNotifications.requestPermission();
+      }, false);
+            
+      function showNotification(text) {        
+        if (window.webkitNotifications.checkPermission() == 0) {
+          // note the show()
+          window.webkitNotifications.createNotification('', 'New Message', text).show(); 
+        } else {
+          alert('You have to click on "Set notification permissions for this page" first to be able to receive notifications.');
+        }  
+      }
       
       var socket = new WebSocket('ws://<%= IP %>:8080');
       
@@ -24,6 +37,8 @@
           .appendTo('#messages');
           
         $('#messages').attr('scrollTop', $('#messages').attr('scrollHeight'));
+        
+        showNotification(evt.data);
         
         li.highlightFade({start: '#0D4512', end: '#000000'});
       }
@@ -59,3 +74,5 @@
     <input type="submit" value="say it" />
   </form>
 </fieldset>
+
+<button id="request_permission" href="#">Set notification permissions for this page</button> 
